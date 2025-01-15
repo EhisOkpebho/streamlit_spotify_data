@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Analyse musicale", layout="wide")
 
-page = st.sidebar.selectbox("Navigation", ["Analyse des facteurs de popularité", "Recherche d'artistes par genre"])
+# Remplacement du menu déroulant par une liste classique
+page = st.sidebar.radio("Navigation", ["Analyse des facteurs de popularité", "Recherche d'artistes par genre"])
 
 uploaded_file = st.file_uploader("Téléchargez votre fichier CSV", type="csv")
 
@@ -91,4 +92,3 @@ if uploaded_file is not None:
             st.warning("Les colonnes 'Genre musical' et 'Artistes' sont nécessaires pour cette analyse. Veuillez vérifier votre fichier CSV.")
 else:
     st.info("Téléchargez un fichier CSV pour commencer l'analyse.")
-    
