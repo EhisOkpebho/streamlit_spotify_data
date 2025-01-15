@@ -5,8 +5,11 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Analyse musicale", layout="wide")
 
-# Remplacement du menu déroulant par une liste classique
-page = st.sidebar.radio("Navigation", ["Analyse des facteurs de popularité", "Recherche d'artistes par genre"])
+page = st.sidebar.radio("Navigation", [
+    "Analyse des facteurs de popularité", 
+    "Recherche d'artistes par genre",
+    "Analyse par artiste"
+])
 
 uploaded_file = st.file_uploader("Téléchargez votre fichier CSV", type="csv")
 
@@ -90,5 +93,38 @@ if uploaded_file is not None:
             st.table(top_artists)
         else:
             st.warning("Les colonnes 'Genre musical' et 'Artistes' sont nécessaires pour cette analyse. Veuillez vérifier votre fichier CSV.")
+
+    elif page == "Analyse par artiste":
+        st.title("Analyse des titres par artiste")
+        if 'Artistes' in df.columns and 'Nom de la piste' in df.columns and 'Popularité' in df.columns and 'Nom de l\'album' in df.columns:
+            artist_list = df['Artistes'].unique().tolist()
+            artist_input = st.selectbox("Recherchez un artiste", artist_list)
+
+            artist_data = df[df['Artistes'] == artist_input]
+
+            album_list = artist_data['Nom de l\'album'].unique().tolist()
+            album_input = st.selectbox("Recherchez un album (facultatif)", ["Tous les albums"] + album_list)
+
+            if album_input != "Tous les albums":
+                artist_data = artist_data[artist_data['Nom de l\'album'] == album_input]
+
+            st.subheader(f"Analyse des titres pour l'artiste : {artist_input}")
+            if album_input != "Tous les albums":
+                st.write(f"Album : {album_input}")
+            
+            if not artist_data.empty:
+                least_popular = artist_data.nsmallest(1, 'Popularité')
+                st.write("Titre le moins populaire :", least_popular[['Nom de la piste', 'Popularité']])
+
+                most_popular = artist_data.nlargest(1, 'Popularité')
+                st.write("Titre le plus populaire :", most_popular[['Nom de la piste', 'Popularité']])
+
+                ranked_titles = artist_data[['Nom de la piste', 'Popularité']].sort_values(by='Popularité', ascending=False)
+                st.subheader("Classement des titres par popularité")
+                st.table(ranked_titles)
+            else:
+                st.warning("Aucun titre trouvé pour cet artiste et cet album.")
+        else:
+            st.warning("Les colonnes nécessaires pour cette analyse sont manquantes. Veuillez vérifier votre fichier CSV.")
 else:
     st.info("Téléchargez un fichier CSV pour commencer l'analyse.")
